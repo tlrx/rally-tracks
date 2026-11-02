@@ -1,0 +1,42 @@
+  {
+    "name": "parallel-index-and-search",
+    "description": "Index the whole corpus and run search queries in parallel (focus on merges under concurrent indexing/search load).",
+    "default": false,
+    "schedule": [
+      {
+        "name": "delete-index",
+        "operation": "delete-index"
+      },
+      {
+        "name": "create-index",
+        "operation": "create-index"
+      },
+      {
+        "name": "check-cluster-health",
+        "operation": "check-cluster-health"
+      },
+      {
+        "parallel": {
+          "completed-by": "parallel-documents-indexing",
+          "tasks": [
+            {
+              "name": "parallel-documents-indexing",
+              "operation": "initial-documents-indexing",
+              "clients": {{ initial_indexing_bulk_clients | default(5) | int }},
+              "warmup-time-period": {{ initial_indexing_bulk_warmup_time_period | default(40) | int }}
+            },
+            {
+              "name": "parallel-documents-indexing-query-string-search",
+              "operation": "query-string-search",
+              "clients": {{ parallel_indexing_search_clients | default(20) | int }},
+              "warmup-time-period": {{ parallel_indexing_search_warmup_time_period | default(40) | int }}
+            }
+          ]
+        }
+      },
+      {
+        "name": "wait-until-merges-finish-after-index",
+        "operation": "wait-until-merges-finish-after-index"
+      }
+    ]
+  }
