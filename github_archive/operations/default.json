@@ -43,6 +43,24 @@
   }
 },
 {
+  "name": "recent_docs",
+  "operation-type": "search",
+  "index": "gharchive*",
+  "body": {
+    "size": {{ p_recent_docs_size }},
+    "track_total_hits": false,
+    "query": {
+      "match_all": {}
+    },
+    "sort": [
+      {
+        "created_at": "desc"
+      }
+    ]
+  }
+  {{ rally.exists_set_param("detailed-results", p_detailed_results, default_value=False) }}
+},
+{
   "name": "default_1k",
   "operation-type": "search",
   "body": {

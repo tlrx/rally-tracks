@@ -2,6 +2,7 @@
 {%- set p_bulk_indexing_clients = bulk_indexing_clients | default(8) %}
 {%- set p_indexing_ramp_up_time_period = indexing_ramp_up_time_period | default(2700) %}
 {%- set p_indexing_warmup_time_period = indexing_warmup_time_period | default(2700) %}
+{%- set p_search_clients_recent = search_clients_recent | default(2) | int %}
 {
   "name": "continuous-growth-with-search",
   "description": "Index the full document corpus (all 15 corpora, ~6.6TB raw / ~1.5B documents) at a sustained, controllable rate while running a steady concurrent background search load throughout.",
@@ -38,6 +39,13 @@
             "operation": "autohisto_agg",
             "clients": {{search_clients_agg | default(2)}}
           },
+          {%- if p_search_clients_recent > 0 %}
+          {
+            "name": "background_recent_docs",
+            "operation": "recent_docs",
+            "clients": {{p_search_clients_recent}}
+          },
+          {%- endif %}
           {
             "name": "background_top_contributors_weekly",
             "operation": "top-es-contributors-weekly",
